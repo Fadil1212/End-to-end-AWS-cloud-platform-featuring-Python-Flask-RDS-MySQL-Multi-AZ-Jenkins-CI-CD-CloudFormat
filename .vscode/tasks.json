@@ -1,0 +1,53 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1 Open private Cloud Jenkins",
+      "type": "shell",
+      "command": "aws ssm start-session --region ${input:awsRegion} --target ${input:jenkinsInstanceId} --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"8080\"],\"localPortNumber\":[\"18088\"]}'",
+      "problemMatcher": []
+    },
+    {
+      "label": "2 Open private EC2 NSRL Web App",
+      "type": "shell",
+      "command": "aws ssm start-session --region ${input:awsRegion} --target ${input:webAppInstanceId} --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"8080\"],\"localPortNumber\":[\"18090\"]}'",
+      "problemMatcher": []
+    },
+    {
+      "label": "3 Open private RDS MySQL tunnel",
+      "type": "shell",
+      "command": "aws ssm start-session --region ${input:awsRegion} --target ${input:jenkinsInstanceId} --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters '{\"host\":[\"${input:dbEndpoint}\"],\"portNumber\":[\"3306\"],\"localPortNumber\":[\"13306\"]}'",
+      "problemMatcher": []
+    },
+    {
+      "label": "4 Run unit tests",
+      "type": "shell",
+      "command": "python3 -m unittest discover -s tests -v",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "jenkinsInstanceId",
+      "type": "promptString",
+      "description": "JenkinsInstanceId from the jenkins-host CloudFormation Outputs"
+    },
+    {
+      "id": "webAppInstanceId",
+      "type": "promptString",
+      "description": "WebAppInstanceId from the cloud-webapp CloudFormation Outputs"
+    },
+    {
+      "id": "awsRegion",
+      "type": "pickString",
+      "description": "AWS Academy Learner Lab region",
+      "options": ["us-east-1", "us-west-2"],
+      "default": "us-east-1"
+    },
+    {
+      "id": "dbEndpoint",
+      "type": "promptString",
+      "description": "DBEndpoint from the cloud-webapp CloudFormation Outputs"
+    }
+  ]
+}
